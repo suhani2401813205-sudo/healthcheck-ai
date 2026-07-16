@@ -27,7 +27,13 @@ df_description = pd.read_csv(os.path.join(BASE_DIR, 'data', 'symptom_Description
 df_description['Disease'] = df_description['Disease'].str.strip()
 
 # Symptoms from command line
-selected_symptoms = json.loads(sys.argv[1])
+# PowerShell compatibility fix
+arg = sys.argv[1]
+# Agar single string hai comma separated to split karo
+try:
+    selected_symptoms = json.loads(arg)
+except:
+    selected_symptoms = [s.strip() for s in arg.split(',')]
 
 # Encode symptoms
 input_encoded = mlb.transform([selected_symptoms])

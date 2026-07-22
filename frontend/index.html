@@ -3,94 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HealthCheck AI — Symptom Checker</title>
+    <title>HealthCheck AI</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" href="data:,">
 </head>
 <body>
 
-<button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">
-    <i class="fa-solid fa-moon" id="theme-icon"></i>
-</button>
-
-<!-- HERO -->
-<div class="hero">
-    <div class="hero-badge"><i class="fa-solid fa-heart-pulse"></i> AI Powered Health Assistant</div>
-    <h1>HealthCheck AI</h1>
-    <p>Select your symptoms and let our ML model predict possible conditions. Always consult a doctor for proper diagnosis.</p>
-    <div class="hero-stats">
-        <div class="hero-stat"><div class="num">41</div><div class="label">Diseases</div></div>
-        <div class="hero-stat"><div class="num">131</div><div class="label">Symptoms</div></div>
-        <div class="hero-stat"><div class="num">4920</div><div class="label">Training Records</div></div>
-        <div class="hero-stat"><div class="num">Top 3</div><div class="label">Predictions</div></div>
+<!-- TOP BAR -->
+<header class="topbar">
+    <div class="topbar-left">
+        <div class="logo">
+            <span class="logo-cross">✚</span>
+            <span class="logo-text">HealthCheck<span class="logo-ai">AI</span></span>
+        </div>
+        <div class="ekg-wrap" aria-hidden="true">
+            <svg class="ekg-svg" viewBox="0 0 200 40" preserveAspectRatio="none">
+                <polyline class="ekg-line" points="0,20 30,20 40,20 50,5 55,35 60,20 80,20 90,20 100,5 105,35 110,20 130,20 200,20"/>
+            </svg>
+        </div>
     </div>
+    <div class="topbar-right">
+        <span class="status-dot"></span>
+        <span class="status-text">ML Model Ready</span>
+        <button class="theme-btn" onclick="toggleTheme()" id="theme-btn" aria-label="Toggle theme">
+            <i class="fa-solid fa-moon" id="theme-icon"></i>
+        </button>
+    </div>
+</header>
+
+<!-- DISCLAIMER STRIP -->
+<div class="disclaimer-strip">
+    <i class="fa-solid fa-circle-info"></i>
+    For educational use only — Not a substitute for professional medical advice. Consult a qualified doctor.
 </div>
 
-<div class="container">
+<!-- MAIN LAYOUT -->
+<main class="layout">
 
-    <!-- DISCLAIMER -->
-    <div class="disclaimer">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        <span>This tool is for <strong>educational purposes only</strong> and is NOT a substitute for professional medical advice. Please consult a qualified doctor for accurate diagnosis.</span>
-    </div>
-
-    <!-- FORM CARD -->
-    <div class="form-card">
-        <div class="form-title"><i class="fa-solid fa-stethoscope"></i> <span>Select Your Symptoms</span></div>
+    <!-- LEFT — SYMPTOM PANEL -->
+    <aside class="symptom-panel">
+        <div class="panel-header">
+            <span class="panel-title">Select Symptoms</span>
+            <span class="selected-count" id="selected-count">0 selected</span>
+        </div>
 
         <!-- Search -->
-        <div class="search-wrap">
-            <i class="fa-solid fa-magnifying-glass search-icon"></i>
-            <input type="text" id="symptom-search" placeholder="Search symptoms..." oninput="filterSymptoms()">
+        <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="symptom-search" placeholder="Search symptoms..." oninput="filterSymptoms()" autocomplete="off">
+            <button class="clear-search" id="clear-search" onclick="clearSearch()" style="display:none;">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </div>
 
-        <!-- Selected symptoms chips -->
-        <div class="selected-wrap" id="selected-wrap" style="display:none;">
-            <div class="selected-label"><i class="fa-solid fa-check-circle"></i> Selected Symptoms:</div>
-            <div class="selected-chips" id="selected-chips"></div>
+        <!-- Search Results -->
+        <div class="search-results" id="search-results" style="display:none;"></div>
+
+        <!-- Categories -->
+        <div class="category-list" id="category-list"></div>
+
+        <!-- Analyze Button -->
+        <button class="btn-analyze" onclick="predict()" id="btn">
+            <i class="fa-solid fa-flask"></i>
+            Run Analysis
+        </button>
+    </aside>
+
+    <!-- RIGHT — CONTENT PANEL -->
+    <section class="content-panel">
+
+        <!-- Selected tags bar -->
+        <div class="tags-bar" id="tags-bar" style="display:none;">
+            <span class="tags-label"><i class="fa-solid fa-tags"></i> Reported:</span>
+            <div class="tags-wrap" id="tags-wrap"></div>
+            <button class="clear-all" onclick="clearAll()">Clear all</button>
         </div>
 
-        <!-- Symptom grid -->
-        <div class="symptom-grid" id="symptom-grid">
-            <div class="loading-symptoms">
-                <i class="fa-solid fa-spinner fa-spin"></i> Loading symptoms...
+        <!-- Empty state -->
+        <div class="empty-state" id="empty-state">
+            <div class="empty-icon">
+                <i class="fa-solid fa-notes-medical"></i>
+            </div>
+            <div class="empty-title">No symptoms selected</div>
+            <div class="empty-desc">Select symptoms from the left panel to begin your health analysis.</div>
+            <div class="hint-list">
+                <div class="hint-item"><i class="fa-solid fa-arrow-left"></i> Browse by category</div>
+                <div class="hint-item"><i class="fa-solid fa-magnifying-glass"></i> Search any symptom</div>
+                <div class="hint-item"><i class="fa-solid fa-flask"></i> Run AI analysis</div>
             </div>
         </div>
 
-        <button class="btn-predict" onclick="predict()" id="btn">
-            <i class="fa-solid fa-wand-magic-sparkles"></i> Analyze Symptoms
-        </button>
-    </div>
+        <!-- Loading -->
+        <div class="analyzing" id="loading" style="display:none;">
+            <div class="pulse-rings">
+                <div class="ring r1"></div>
+                <div class="ring r2"></div>
+                <div class="ring r3"></div>
+                <i class="fa-solid fa-heartbeat pulse-icon"></i>
+            </div>
+            <div class="analyzing-text">Analyzing symptoms<span class="dot-anim">...</span></div>
+        </div>
 
-    <!-- LOADING -->
-    <div class="loading" id="loading">
-        <div class="loader"></div>
-        <p>Analyzing your symptoms<span class="loading-dots"></span></p>
-    </div>
+        <!-- Error -->
+        <div class="error-card" id="error" style="display:none;"></div>
 
-    <!-- ERROR -->
-    <div class="error-msg" id="error"></div>
+        <!-- Result -->
+        <div class="result-panel" id="result" style="display:none;"></div>
 
-    <!-- RESULTS -->
-    <div class="result" id="result"></div>
+    </section>
+</main>
 
-</div>
-
-<script>
-// Theme
-const saved = localStorage.getItem('hc_theme') || 'light';
-document.documentElement.setAttribute('data-theme', saved);
-document.getElementById('theme-icon').className = saved === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
-
-function toggleTheme() {
-    const current = document.documentElement.getAttribute('data-theme');
-    const next = current === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem('hc_theme', next);
-    document.getElementById('theme-icon').className = next === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
-}
-</script>
 <script src="js/app.js"></script>
 </body>
 </html>

@@ -13,7 +13,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// Frontend serve karo
+
 app.use(express.static(path.join(__dirname, '../frontend')));
 
 // Root test

@@ -37,16 +37,17 @@ function toggleTheme() {
     document.getElementById('theme-icon').className = nxt === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
 }
 
-// Load symptoms
 async function loadSymptoms() {
     try {
         const res = await fetch('/symptoms');
         const data = await res.json();
         allSymptoms = data.symptoms;
-        renderCategories();
+        populateCatDropdown();
+        renderSymList('all');  // ← ye line check karo hai kya
+        renderCatGridTab();
     } catch(e) {
-        document.getElementById('category-list').innerHTML =
-            '<p style="padding:16px;font-size:12px;color:var(--text-faint);">Could not load symptoms. Is server running?</p>';
+        document.getElementById('sym-list').innerHTML =
+            '<p style="padding:12px;font-size:11px;color:var(--text3);">Could not load symptoms. Is server running?</p>';
     }
 }
 

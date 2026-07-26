@@ -10,109 +10,192 @@
 </head>
 <body>
 
-<!-- TOP BAR -->
-<header class="topbar">
-    <div class="topbar-left">
-        <div class="logo">
-            <span class="logo-cross">✚</span>
-            <span class="logo-text">HealthCheck<span class="logo-ai">AI</span></span>
-        </div>
-        <div class="ekg-wrap" aria-hidden="true">
-            <svg class="ekg-svg" viewBox="0 0 200 40" preserveAspectRatio="none">
-                <polyline class="ekg-line" points="0,20 30,20 40,20 50,5 55,35 60,20 80,20 90,20 100,5 105,35 110,20 130,20 200,20"/>
-            </svg>
+<!-- TOP NAV -->
+<nav class="topnav">
+    <div class="nav-brand">
+        <div class="brand-icon"><span>✚</span></div>
+        <div class="brand-text">
+            <span class="brand-name">HealthCheck<span class="brand-ai">AI</span></span>
+            <span class="brand-sub">Your Health. Our Priority.</span>
         </div>
     </div>
-    <div class="topbar-right">
-        <span class="status-dot"></span>
-        <span class="status-text">ML Model Ready</span>
-        <button class="theme-btn" onclick="toggleTheme()" id="theme-btn" aria-label="Toggle theme">
-            <i class="fa-solid fa-moon" id="theme-icon"></i>
-        </button>
+    <div class="nav-ekg">
+        <svg viewBox="0 0 220 36" preserveAspectRatio="none">
+            <polyline class="ekg-line" points="0,18 35,18 45,18 55,3 60,33 65,18 85,18 95,18 105,3 110,33 115,18 140,18 220,18"/>
+        </svg>
     </div>
-</header>
+    <div class="nav-right">
+        <div class="status-pill"><span class="dot"></span> ML Ready</div>
+        <button class="theme-btn" onclick="toggleTheme()" id="theme-btn"><i class="fa-solid fa-moon" id="theme-icon"></i></button>
+    </div>
+</nav>
 
-<!-- DISCLAIMER STRIP -->
-<div class="disclaimer-strip">
-    <i class="fa-solid fa-circle-info"></i>
-    For educational use only — Not a substitute for professional medical advice. Consult a qualified doctor.
-</div>
+<!-- MAIN DASHBOARD -->
+<div class="dashboard">
 
-<!-- MAIN LAYOUT -->
-<main class="layout">
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-inner">
+            <!-- Hero mini card -->
+            <div class="hero-card">
+                <div class="hero-card-icon"><i class="fa-solid fa-brain"></i></div>
+                <div class="hero-card-text">
+                    <div class="hero-card-title">HealthCheck AI</div>
+                    <div class="hero-card-sub">AI-Powered symptom analysis using ML trained on 4920+ medical records.</div>
+                </div>
+            </div>
 
-    <!-- LEFT — SYMPTOM PANEL -->
-    <aside class="symptom-panel">
-        <div class="panel-header">
-            <span class="panel-title">Select Symptoms</span>
-            <span class="selected-count" id="selected-count">0 selected</span>
+            <!-- Stats row -->
+            <div class="stats-row">
+                <div class="stat"><div class="stat-num">41</div><div class="stat-lbl">Diseases</div></div>
+                <div class="stat"><div class="stat-num">131</div><div class="stat-lbl">Symptoms</div></div>
+                <div class="stat"><div class="stat-num">Top 3</div><div class="stat-lbl">Predictions</div></div>
+            </div>
+
+            <!-- Nav items -->
+            <div class="nav-items">
+                <div class="nav-item active" onclick="showTab('checker')">
+                    <i class="fa-solid fa-stethoscope"></i> Symptom Checker
+                </div>
+                <div class="nav-item" onclick="showTab('categories')">
+                    <i class="fa-solid fa-grid-2"></i> Categories
+                </div>
+                <div class="nav-item" onclick="showTab('about')">
+                    <i class="fa-solid fa-circle-info"></i> About
+                </div>
+            </div>
+
+            <!-- Security note -->
+            <div class="security-note">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>Your data is secure and confidential.</span>
+            </div>
         </div>
-
-        <!-- Search -->
-        <div class="search-box">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="symptom-search" placeholder="Search symptoms..." oninput="filterSymptoms()" autocomplete="off">
-            <button class="clear-search" id="clear-search" onclick="clearSearch()" style="display:none;">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-
-        <!-- Search Results -->
-        <div class="search-results" id="search-results" style="display:none;"></div>
-
-        <!-- Categories -->
-        <div class="category-list" id="category-list"></div>
-
-        <!-- Analyze Button -->
-        <button class="btn-analyze" onclick="predict()" id="btn">
-            <i class="fa-solid fa-flask"></i>
-            Run Analysis
-        </button>
     </aside>
 
-    <!-- RIGHT — CONTENT PANEL -->
-    <section class="content-panel">
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
 
-        <!-- Selected tags bar -->
-        <div class="tags-bar" id="tags-bar" style="display:none;">
-            <span class="tags-label"><i class="fa-solid fa-tags"></i> Reported:</span>
-            <div class="tags-wrap" id="tags-wrap"></div>
-            <button class="clear-all" onclick="clearAll()">Clear all</button>
+        <!-- TAB: Symptom Checker -->
+        <div class="tab-content active" id="tab-checker">
+
+            <!-- Info banner -->
+            <div class="info-banner">
+                <div class="banner-left">
+                    <div class="banner-title">HealthCheck AI <span>— Your Intelligent Health Assistant</span></div>
+                    <div class="banner-desc">Analyze your symptoms using ML models trained on medical datasets to get possible insights and precautions.</div>
+                </div>
+                <div class="banner-stats">
+                    <div class="bstat"><i class="fa-solid fa-database"></i><div class="bstat-num">4920+</div><div class="bstat-lbl">Records</div></div>
+                    <div class="bstat"><i class="fa-solid fa-virus"></i><div class="bstat-num">131</div><div class="bstat-lbl">Symptoms</div></div>
+                    <div class="bstat"><i class="fa-solid fa-shield-virus"></i><div class="bstat-num">AI</div><div class="bstat-lbl">Powered</div></div>
+                </div>
+            </div>
+
+            <!-- 3 col grid -->
+            <div class="checker-grid">
+
+                <!-- COL 1: Select Symptoms -->
+                <div class="grid-card" id="col-select">
+                    <div class="card-header">
+                        <span class="step-badge">1</span>
+                        <span class="card-title">Select Symptoms</span>
+                    </div>
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="symptom-search" placeholder="Search symptoms..." oninput="filterSymptoms()" autocomplete="off">
+                        <button id="clear-search" onclick="clearSearch()" style="display:none;"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <div id="search-results" style="display:none;" class="sym-scroll"></div>
+                    <div class="cat-dropdown-wrap">
+                        <select id="cat-select" onchange="renderCatSymptoms()">
+                            <option value="all">All Categories</option>
+                        </select>
+                        <i class="fa-solid fa-chevron-down dd-arrow"></i>
+                    </div>
+                    <div class="sym-scroll" id="sym-list"></div>
+                </div>
+
+                <!-- COL 2: Selected Symptoms -->
+                <div class="grid-card" id="col-selected">
+                    <div class="card-header">
+                        <span class="step-badge">2</span>
+                        <span class="card-title">Selected Symptoms <span class="count-badge" id="count-badge">0</span></span>
+                        <button class="clear-all-btn" onclick="clearAll()"><i class="fa-solid fa-trash"></i> Clear</button>
+                    </div>
+                    <div class="selected-chips" id="selected-chips">
+                        <div class="empty-chips"><i class="fa-solid fa-hand-pointer"></i><br>Select symptoms from the left panel</div>
+                    </div>
+                    <button class="btn-analyze" onclick="predict()" id="btn">
+                        <i class="fa-solid fa-flask-vial"></i> Analyze Symptoms
+                    </button>
+                </div>
+
+                <!-- COL 3: Results -->
+                <div class="grid-card" id="col-result">
+                    <div class="card-header">
+                        <span class="step-badge">3</span>
+                        <span class="card-title">AI Analysis</span>
+                    </div>
+                    <!-- Empty state -->
+                    <div class="result-empty" id="result-empty">
+                        <i class="fa-solid fa-notes-medical"></i>
+                        <p>Results will appear here after analysis</p>
+                    </div>
+                    <!-- Loading -->
+                    <div class="result-loading" id="result-loading" style="display:none;">
+                        <div class="pulse-wrap">
+                            <div class="pulse-ring r1"></div>
+                            <div class="pulse-ring r2"></div>
+                            <i class="fa-solid fa-heartbeat pulse-ic"></i>
+                        </div>
+                        <p>AI Analyzing<span class="dot-anim"></span></p>
+                        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+                    </div>
+                    <!-- Error -->
+                    <div class="result-error" id="result-error" style="display:none;"></div>
+                    <!-- Result content -->
+                    <div class="result-content" id="result-content" style="display:none;"></div>
+                </div>
+
+            </div>
         </div>
 
-        <!-- Empty state -->
-        <div class="empty-state" id="empty-state">
-            <div class="empty-icon">
-                <i class="fa-solid fa-notes-medical"></i>
+        <!-- TAB: Categories -->
+        <div class="tab-content" id="tab-categories">
+            <div class="info-banner">
+                <div class="banner-left">
+                    <div class="banner-title">Browse <span>Symptom Categories</span></div>
+                    <div class="banner-desc">Browse symptoms organized by body system or condition type.</div>
+                </div>
             </div>
-            <div class="empty-title">No symptoms selected</div>
-            <div class="empty-desc">Select symptoms from the left panel to begin your health analysis.</div>
-            <div class="hint-list">
-                <div class="hint-item"><i class="fa-solid fa-arrow-left"></i> Browse by category</div>
-                <div class="hint-item"><i class="fa-solid fa-magnifying-glass"></i> Search any symptom</div>
-                <div class="hint-item"><i class="fa-solid fa-flask"></i> Run AI analysis</div>
+            <div class="cat-grid" id="cat-grid-tab"></div>
+        </div>
+
+        <!-- TAB: About -->
+        <div class="tab-content" id="tab-about">
+            <div class="info-banner">
+                <div class="banner-left">
+                    <div class="banner-title">About <span>HealthCheck AI</span></div>
+                    <div class="banner-desc">Learn about how this ML system works.</div>
+                </div>
+            </div>
+            <div class="about-grid">
+                <div class="about-card"><i class="fa-solid fa-brain"></i><h3>ML Model</h3><p>Logistic Regression trained on 4920 medical records with 131 symptoms across 41 diseases.</p></div>
+                <div class="about-card"><i class="fa-solid fa-code"></i><h3>Tech Stack</h3><p>Python · Pandas · Scikit-learn · Node.js · Express · HTML/CSS/JS</p></div>
+                <div class="about-card"><i class="fa-solid fa-triangle-exclamation"></i><h3>Disclaimer</h3><p>This tool is for educational purposes only. Always consult a qualified doctor for medical advice.</p></div>
+                <div class="about-card"><i class="fa-solid fa-database"></i><h3>Dataset</h3><p>Kaggle Disease Symptom Prediction Dataset — 4920 records, 41 diseases, 131 unique symptoms.</p></div>
             </div>
         </div>
 
-        <!-- Loading -->
-        <div class="analyzing" id="loading" style="display:none;">
-            <div class="pulse-rings">
-                <div class="ring r1"></div>
-                <div class="ring r2"></div>
-                <div class="ring r3"></div>
-                <i class="fa-solid fa-heartbeat pulse-icon"></i>
-            </div>
-            <div class="analyzing-text">Analyzing symptoms<span class="dot-anim">...</span></div>
+        <!-- DISCLAIMER FOOTER -->
+        <div class="disclaimer-footer">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span><strong>Disclaimer:</strong> This AI analysis is for educational purposes only and must not be used as a medical diagnosis. Always consult a qualified healthcare professional.</span>
         </div>
 
-        <!-- Error -->
-        <div class="error-card" id="error" style="display:none;"></div>
-
-        <!-- Result -->
-        <div class="result-panel" id="result" style="display:none;"></div>
-
-    </section>
-</main>
+    </main>
+</div>
 
 <script src="js/app.js"></script>
 </body>

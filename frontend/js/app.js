@@ -1,4 +1,4 @@
-// HealthCheck AI — app.js
+
 
 let selectedSymptoms = [];
 let allSymptoms = [];

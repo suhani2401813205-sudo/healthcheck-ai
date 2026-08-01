@@ -654,11 +654,25 @@ body{display:flex;flex-direction:column;overflow:hidden;}
 
 /* TABLET PORTRAIT */
 @media (max-width: 900px) {
-    .dashboard{
+    /* The desktop layout is a fixed-height app-shell (html/body/.dashboard/
+       .main-content are all overflow:hidden with flex rows). On mobile we
+       switch it to a normal scrolling page and stack sidebar above content,
+       otherwise the sidebar just squeezes into the same row as main-content
+       and everything below gets clipped. */
+    html, body{
+        height: auto;
+        overflow: visible;
+    }
+    body{
         overflow-y: auto;
+    }
+    .dashboard{
+        flex-direction: column;
+        overflow: visible;
     }
     .sidebar{
         width: 100%;
+        flex-shrink: 0;
         border-right: none;
         border-bottom: 1px solid var(--border);
     }
@@ -668,6 +682,7 @@ body{display:flex;flex-direction:column;overflow:hidden;}
         padding: 10px 12px;
         gap: 10px;
         overflow-x: auto;
+        height: auto;
     }
     .nav-items{
         flex-direction: row;
@@ -684,7 +699,11 @@ body{display:flex;flex-direction:column;overflow:hidden;}
         min-width: 220px;
     }
     .main-content{
-        padding: 12px 12px 0;
+        overflow: visible;
+        padding: 12px 12px 16px;
+    }
+    .tab-content.active{
+        overflow: visible;
     }
     .info-banner{
         flex-direction: column;
@@ -694,6 +713,29 @@ body{display:flex;flex-direction:column;overflow:hidden;}
     .banner-stats{
         width: 100%;
         justify-content: space-between;
+    }
+    .checker-grid{
+        grid-template-columns: 1fr;
+        overflow: visible;
+    }
+    .right-workspace{
+        overflow: visible;
+    }
+    .col-selection{
+        height: auto;
+    }
+    .sym-scroll{
+        max-height: 260px;
+    }
+    .results-dashboard{
+        overflow: visible;
+    }
+    .result-content{
+        overflow: visible;
+    }
+    .result-empty, .result-loading{
+        flex: none;
+        padding: 30px 16px;
     }
 }
 
@@ -756,6 +798,10 @@ body{display:flex;flex-direction:column;overflow:hidden;}
     }
     .disease-name{
         font-size: 18px;
+    }
+    .chips-container-wrap{
+        flex-direction: column;
+        align-items: stretch;
     }
     .btn-analyze{
         width: 100%;

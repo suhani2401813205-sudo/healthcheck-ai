@@ -1,5 +1,3 @@
-
-
 let selectedSymptoms = [];
 let allSymptoms = [];
 
@@ -24,41 +22,81 @@ const CATEGORIES = [
       symptoms: ["weight_loss","weight_gain","obesity","swollen_lymph_nodes","swelling_joints","stiff_neck","swollen_legs","swollen_blood_vessels","puffy_face_and_eyes","enlarged_thyroid","excessive_hunger","increased_appetite","polyuria","dehydration","muscle_wasting","history_of_alcohol_consumption","fluid_overload","family_history","receiving_blood_transfusion","receiving_unsterile_injections"] }
 ];
 
-// Theme
-const saved = localStorage.getItem('hc_theme') || 'light';
-document.documentElement.setAttribute('data-theme', saved);
-document.getElementById('theme-icon').className = saved === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+// --- Theme Management ---
+const savedTheme = localStorage.getItem('hc_theme') || 'light';
+document.documentElement.setAttribute('data-theme', savedTheme);
 
 function toggleTheme() {
     const cur = document.documentElement.getAttribute('data-theme');
     const nxt = cur === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', nxt);
     localStorage.setItem('hc_theme', nxt);
-    document.getElementById('theme-icon').className = nxt === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+    const icon = document.getElementById('theme-icon');
+    if (icon) icon.className = nxt === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
 }
 
+// --- Navigation Tab Switching ---
+function showTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+    const activeTab = document.getElementById(`tab-${tabName}`);
+    if (activeTab) activeTab.classList.add('active');
+
+    const clickedNav = Array.from(document.querySelectorAll('.nav-item')).find(el => el.getAttribute('onclick')?.includes(tabName));
+    if (clickedNav) clickedNav.classList.add('active');
+
+    if (tabName === 'categories') {
+        renderCatGridTab();
+    }
+}
+
+// --- Data Fetching & Dynamic Setup ---
 async function loadSymptoms() {
     try {
         const res = await fetch('/symptoms');
         const data = await res.json();
-        allSymptoms = data.symptoms;
-        populateCatDropdown();
-        renderSymList('all');  // ← ye line check karo hai kya
-        renderCatGridTab();
+        allSymptoms = Array.isArray(data) ? data : (data.symptoms || []);
     } catch(e) {
-        document.getElementById('sym-list').innerHTML =
-            '<p style="padding:12px;font-size:11px;color:var(--text3);">Could not load symptoms. Is server running?</p>';
+        console.warn('Backend /symptoms unavailable. Falling back to local category data.', e);
+        allSymptoms = CATEGORIES.flatMap(c => c.symptoms);
+    } finally {
+        populateCatDropdown();
+        renderCatSymptoms();
     }
 }
 
-function renderCategories() {
-    const list = document.getElementById('category-list');
-    list.innerHTML = CATEGORIES.map((cat, i) => {
-        const valid = cat.symptoms.filter(s => allSymptoms.includes(s));
+function populateCatDropdown() {
+    const select = document.getElementById('cat-select');
+    if (!select) return;
+
+    select.innerHTML = '<option value="all">All Categories</option>' + 
+        CATEGORIES.map((cat, i) => `<option value="${i}">${cat.name}</option>`).join('');
+    
+    select.value = 'all';
+}
+
+function renderCatSymptoms() {
+    const container = document.getElementById('sym-list');
+    const catVal = document.getElementById('cat-select')?.value;
+    if (!container) return;
+
+    let categoriesToRender = CATEGORIES;
+
+    if (catVal && catVal !== 'all') {
+        const index = parseInt(catVal, 10);
+        if (!isNaN(index) && CATEGORIES[index]) {
+            categoriesToRender = [CATEGORIES[index]];
+        }
+    }
+
+    container.innerHTML = categoriesToRender.map((cat, i) => {
+        const valid = cat.symptoms.filter(s => allSymptoms.length === 0 || allSymptoms.includes(s));
         if (!valid.length) return '';
+
         return `
         <div class="cat-group open" id="cg-${i}">
-            <div class="cat-header" onclick="toggleCat(${i})">
+            <div class="cat-header" onclick="toggleCat('${i}')">
                 <i class="fa-solid ${cat.icon} cat-icon" style="color:${cat.color}"></i>
                 <span class="cat-label">${cat.name}</span>
                 <i class="fa-solid fa-chevron-down cat-arrow"></i>
@@ -75,14 +113,16 @@ function symItem(s, extraClass = '') {
     return `<div class="sym-item ${active ? 'active' : ''} ${extraClass}" 
                  data-sym="${s}" onclick="toggleSymptom('${s}')">
         <i class="fa-solid ${active ? 'fa-square-check' : 'fa-square'} sym-check"></i>
-        ${s.replace(/_/g, ' ')}
+        <span>${s.replace(/_/g, ' ')}</span>
     </div>`;
 }
 
 function toggleCat(i) {
-    document.getElementById(`cg-${i}`).classList.toggle('open');
+    const group = document.getElementById(`cg-${i}`);
+    if (group) group.classList.toggle('open');
 }
 
+// --- Symptom Selection Logic ---
 function toggleSymptom(s) {
     if (selectedSymptoms.includes(s)) {
         selectedSymptoms = selectedSymptoms.filter(x => x !== s);
@@ -100,69 +140,106 @@ function removeSymptom(s) {
 function clearAll() {
     selectedSymptoms = [];
     updateUI();
-    document.getElementById('result').style.display = 'none';
-    document.getElementById('empty-state').style.display = 'flex';
+    const resultContent = document.getElementById('result-content');
+    const resultEmpty = document.getElementById('result-empty');
+    if (resultContent) resultContent.style.display = 'none';
+    if (resultEmpty) resultEmpty.style.display = 'flex';
 }
 
 function updateUI() {
-    // Count badge
-    document.getElementById('selected-count').textContent =
-        selectedSymptoms.length + ' selected';
+    // 1. Update Count Badge
+    const badge = document.getElementById('count-badge');
+    if (badge) badge.textContent = selectedSymptoms.length;
 
-    // Tags bar
-    const tagsBar = document.getElementById('tags-bar');
-    const tagsWrap = document.getElementById('tags-wrap');
-    if (selectedSymptoms.length === 0) {
-        tagsBar.style.display = 'none';
-    } else {
-        tagsBar.style.display = 'flex';
-        tagsWrap.innerHTML = selectedSymptoms.map(s => `
-            <div class="tag">
-                ${s.replace(/_/g,' ')}
-                <button onclick="removeSymptom('${s}')">×</button>
-            </div>`).join('');
+    // 2. Render Selected Chips in Column 2
+    const chipsContainer = document.getElementById('selected-chips');
+    if (chipsContainer) {
+        if (selectedSymptoms.length === 0) {
+            chipsContainer.innerHTML = `<div class="empty-chips"><i class="fa-solid fa-hand-pointer"></i><br>Select symptoms from the left panel</div>`;
+        } else {
+            chipsContainer.innerHTML = selectedSymptoms.map(s => `
+                <div class="tag">
+                    <span>${s.replace(/_/g,' ')}</span>
+                    <button onclick="removeSymptom('${s}')">&times;</button>
+                </div>`).join('');
+        }
     }
 
-    // Refresh sym-item states in sidebar
+    // 3. Update Checkbox Icons across the page
     document.querySelectorAll('.sym-item').forEach(el => {
         const s = el.getAttribute('data-sym');
         const active = selectedSymptoms.includes(s);
         el.classList.toggle('active', active);
-        el.querySelector('.sym-check').className =
-            `fa-solid ${active ? 'fa-square-check' : 'fa-square'} sym-check`;
+        const checkIcon = el.querySelector('.sym-check');
+        if (checkIcon) {
+            checkIcon.className = `fa-solid ${active ? 'fa-square-check' : 'fa-square'} sym-check`;
+        }
     });
 }
 
+// --- Search Filter Logic ---
 function filterSymptoms() {
-    const q = document.getElementById('symptom-search').value.toLowerCase().trim();
+    const q = document.getElementById('symptom-search')?.value.toLowerCase().trim() || '';
     const searchDiv = document.getElementById('search-results');
-    const catList = document.getElementById('category-list');
+    const symList = document.getElementById('sym-list');
+    const catSelectWrap = document.querySelector('.cat-dropdown-wrap');
     const clearBtn = document.getElementById('clear-search');
 
-    clearBtn.style.display = q ? 'flex' : 'none';
+    if (clearBtn) clearBtn.style.display = q ? 'block' : 'none';
 
     if (!q) {
-        searchDiv.style.display = 'none';
-        catList.style.display = 'block';
+        if (searchDiv) searchDiv.style.display = 'none';
+        if (symList) symList.style.display = 'block';
+        if (catSelectWrap) catSelectWrap.style.display = 'block';
         return;
     }
 
-    const filtered = allSymptoms.filter(s => s.includes(q) || s.replace(/_/g,' ').includes(q));
-    catList.style.display = 'none';
-    searchDiv.style.display = 'block';
+    const sourceList = allSymptoms.length > 0 ? allSymptoms : CATEGORIES.flatMap(c => c.symptoms);
+    const filtered = sourceList.filter(s => s.includes(q) || s.replace(/_/g,' ').includes(q));
 
-    if (!filtered.length) {
-        searchDiv.innerHTML = '<p style="padding:12px;font-size:12px;color:var(--text-faint);">No symptoms found.</p>';
-        return;
+    if (symList) symList.style.display = 'none';
+    if (catSelectWrap) catSelectWrap.style.display = 'none';
+    if (searchDiv) searchDiv.style.display = 'block';
+
+    if (searchDiv) {
+        if (!filtered.length) {
+            searchDiv.innerHTML = '<p style="padding:12px;font-size:12px;color:var(--text-faint);">No symptoms found.</p>';
+        } else {
+            searchDiv.innerHTML = filtered.map(s => symItem(s)).join('');
+        }
     }
-    searchDiv.innerHTML = filtered.map(s => symItem(s)).join('');
 }
 
 function clearSearch() {
-    document.getElementById('symptom-search').value = '';
+    const input = document.getElementById('symptom-search');
+    if (input) input.value = '';
     filterSymptoms();
 }
 
+// --- Categories Tab Grid View ---
+function renderCatGridTab() {
+    const grid = document.getElementById('cat-grid-tab');
+    if (!grid) return;
+
+    grid.innerHTML = CATEGORIES.map((cat) => `
+        <div class="cat-grid-card">
+            <div class="cat-grid-header">
+                <i class="fa-solid ${cat.icon}" style="color:${cat.color}"></i>
+                <h3>${cat.name}</h3>
+            </div>
+            <div class="cat-grid-symptoms">
+                ${cat.symptoms.map(s => `
+                    <span class="chip ${selectedSymptoms.includes(s) ? 'active' : ''}" onclick="toggleSymptom('${s}')">
+                        ${s.replace(/_/g, ' ')}
+                    </span>
+                `).join('')}
+            </div>
+        </div>
+    `).join('');
+}
+
+// --- Predict API Call ---
+// --- Predict API Call ---
 async function predict() {
     if (!selectedSymptoms.length) {
         showError('Please select at least one symptom.');
@@ -170,8 +247,6 @@ async function predict() {
     }
     hideError();
     showLoading(true);
-    document.getElementById('empty-state').style.display = 'none';
-    document.getElementById('result').style.display = 'none';
 
     try {
         const res = await fetch('/predict', {
@@ -181,7 +256,11 @@ async function predict() {
         });
         const data = await res.json();
         showLoading(false);
-        if (data.error) { showError(data.error); return; }
+        
+        if (data.error) { 
+            showError(data.error); 
+            return; 
+        }
         displayResult(data);
     } catch(e) {
         showLoading(false);
@@ -193,78 +272,100 @@ function displayResult(data) {
     const top = data.top_predictions || [];
     const prec = data.precautions || [];
     const used = data.used_symptoms || selectedSymptoms;
-    const fills = ['fill-1','fill-2','fill-3'];
 
-    document.getElementById('result').innerHTML = `
-        <div class="primary-card">
-            <div class="primary-card-header">
-                <span class="label"><i class="fa-solid fa-stethoscope"></i> &nbsp;Primary Diagnosis</span>
-                <span class="confidence-badge">${top[0]?.confidence ?? '—'}% confidence</span>
-            </div>
-            <div class="primary-card-body">
-                <div class="disease-name">${data.primary_prediction}</div>
-                <div class="description-text">${data.description || 'No description available.'}</div>
-            </div>
-        </div>
+    const resultContent = document.getElementById('result-content');
+    const resultEmpty = document.getElementById('result-empty');
+    
+    if (resultEmpty) resultEmpty.style.display = 'none';
 
-        <div class="cards-row">
+    if (resultContent) {
+        const timeString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const dateString = new Date().toLocaleDateString();
+
+        resultContent.innerHTML = `
+            <!-- ACTION / EXPORT BAR -->
+            <div class="results-action-bar">
+                <div class="result-timestamp">
+                    <i class="fa-regular fa-clock"></i> Generated on: ${dateString} at ${timeString}
+                </div>
+                <button class="btn-export" onclick="window.print()">
+                    <i class="fa-solid fa-file-pdf"></i> Export / Print Report
+                </button>
+            </div>
+
+            <!-- PRIMARY DIAGNOSIS CARD -->
+            <div class="primary-card">
+                <div class="primary-card-header">
+                    <span class="label"><i class="fa-solid fa-stethoscope"></i> &nbsp;Primary Diagnosis</span>
+                    <span class="confidence-badge">${top[0]?.confidence ?? '—'}% confidence</span>
+                </div>
+                <div class="primary-card-body">
+                    <div class="disease-name">${data.primary_prediction || 'Unknown'}</div>
+                    <div class="description-text">${data.description || 'No description available.'}</div>
+                </div>
+            </div>
+
+            <!-- TOP 3 & PRECAUTIONS ROW -->
+            <div class="cards-row">
+                <div class="info-card">
+                    <div class="info-card-title"><i class="fa-solid fa-list-ol"></i> Top 3 Conditions</div>
+                    ${top.map((p, i) => `
+                        <div class="pred-item">
+                            <div class="pred-row">
+                                <span class="pred-name">${i + 1}. ${p.disease}</span>
+                                <span class="pred-pct">${p.confidence}%</span>
+                            </div>
+                            <div class="pred-bar">
+                                <div class="pred-fill fill-${i + 1}" style="width:${Math.min(p.confidence, 100)}%"></div>
+                            </div>
+                        </div>`).join('')}
+                </div>
+
+                <div class="info-card">
+                    <div class="info-card-title"><i class="fa-solid fa-shield-heart"></i> Precautions</div>
+                    ${prec.length ? prec.map(p => `
+                        <div class="precaution-item">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span>${p}</span>
+                        </div>`).join('') : '<p style="font-size:12px;color:var(--text-faint);">No precautions found.</p>'}
+                </div>
+            </div>
+
+            <!-- SYMPTOMS ANALYZED -->
             <div class="info-card">
-                <div class="info-card-title"><i class="fa-solid fa-list-ol"></i> Top 3 Conditions</div>
-                ${top.map((p,i) => `
-                    <div class="pred-item">
-                        <div class="pred-row">
-                            <span class="pred-name">${i+1}. ${p.disease}</span>
-                            <span class="pred-pct">${p.confidence}%</span>
-                        </div>
-                        <div class="pred-bar">
-                            <div class="pred-fill ${fills[i]}" style="width:${Math.min(p.confidence,100)}%"></div>
-                        </div>
-                    </div>`).join('')}
+                <div class="info-card-title"><i class="fa-solid fa-virus"></i> Symptoms Analyzed</div>
+                <div class="symptom-tags">
+                    ${used.map(s => `<span class="sym-tag">${s.replace(/_/g, ' ')}</span>`).join('')}
+                </div>
             </div>
+        `;
 
-            <div class="info-card">
-                <div class="info-card-title"><i class="fa-solid fa-shield-heart"></i> Precautions</div>
-                ${prec.length ? prec.map(p => `
-                    <div class="precaution-item">
-                        <i class="fa-solid fa-circle-check"></i>
-                        <span>${p}</span>
-                    </div>`).join('') : '<p style="font-size:12px;color:var(--text-faint);">No precautions found.</p>'}
-            </div>
-        </div>
-
-        <div class="info-card">
-            <div class="info-card-title"><i class="fa-solid fa-virus"></i> Symptoms Analyzed</div>
-            <div class="symptom-tags">
-                ${used.map(s => `<span class="sym-tag">${s.replace(/_/g,' ')}</span>`).join('')}
-            </div>
-        </div>
-
-        <div class="result-disclaimer">
-            <i class="fa-solid fa-triangle-exclamation"></i>
-            <span><strong>Disclaimer:</strong> This AI analysis is for educational purposes only and must not be used as a medical diagnosis. Always consult a qualified healthcare professional for proper evaluation and treatment.</span>
-        </div>
-    `;
-
-    document.getElementById('result').style.display = 'flex';
-    document.getElementById('content-panel')?.scrollTo({ top: 0, behavior: 'smooth' });
+        resultContent.style.display = 'block';
+    }
 }
 
 function showLoading(show) {
-    document.getElementById('loading').style.display = show ? 'flex' : 'none';
-    document.getElementById('btn').disabled = show;
-    document.getElementById('btn').innerHTML = show
-        ? '<i class="fa-solid fa-spinner fa-spin"></i> Analyzing...'
-        : '<i class="fa-solid fa-flask"></i> Run Analysis';
+    const loading = document.getElementById('result-loading');
+    const empty = document.getElementById('result-empty');
+    const content = document.getElementById('result-content');
+
+    if (loading) loading.style.display = show ? 'flex' : 'none';
+    if (empty) empty.style.display = show ? 'none' : (selectedSymptoms.length ? 'none' : 'flex');
+    if (content && show) content.style.display = 'none';
 }
 
 function showError(msg) {
-    const e = document.getElementById('error');
-    e.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${msg}`;
-    e.style.display = 'flex';
+    const e = document.getElementById('result-error');
+    if (e) {
+        e.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${msg}`;
+        e.style.display = 'flex';
+    }
 }
 
 function hideError() {
-    document.getElementById('error').style.display = 'none';
+    const e = document.getElementById('result-error');
+    if (e) e.style.display = 'none';
 }
 
-loadSymptoms();
+// Initial Launch
+document.addEventListener('DOMContentLoaded', loadSymptoms);

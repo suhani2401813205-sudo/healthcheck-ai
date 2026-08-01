@@ -634,3 +634,164 @@ body{display:flex;flex-direction:column;overflow:hidden;}
         stroke-dashoffset: 264;
     }
 }
+
+/* ==========================================
+   MOBILE RESPONSIVE ADDITIONS
+   (Nothing above this line was changed —
+   only new rules added below to adapt the
+   existing layout to small screens.)
+   ========================================== */
+
+/* TABLET / SMALL LAPTOP */
+@media (max-width: 1024px) {
+    .checker-grid{
+        grid-template-columns: 260px 1fr;
+    }
+    .sidebar{
+        width: 200px;
+    }
+}
+
+/* TABLET PORTRAIT */
+@media (max-width: 900px) {
+    .dashboard{
+        overflow-y: auto;
+    }
+    .sidebar{
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+    }
+    .sidebar-inner{
+        flex-direction: row;
+        align-items: center;
+        padding: 10px 12px;
+        gap: 10px;
+        overflow-x: auto;
+    }
+    .nav-items{
+        flex-direction: row;
+        gap: 6px;
+        flex-shrink: 0;
+    }
+    .nav-item{
+        padding: 8px 12px;
+        white-space: nowrap;
+    }
+    .sidebar-hero-card{
+        margin-top: 0;
+        flex-shrink: 0;
+        min-width: 220px;
+    }
+    .main-content{
+        padding: 12px 12px 0;
+    }
+    .info-banner{
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 14px 16px;
+    }
+    .banner-stats{
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+/* MOBILE */
+@media (max-width: 640px) {
+    html,body{
+        font-size: 12px;
+    }
+    .topnav{
+        padding: 0 12px;
+        gap: 8px;
+        flex-wrap: nowrap;
+    }
+    .nav-brand{
+        gap: 8px;
+    }
+    .brand-icon{
+        width: 32px;
+        height: 32px;
+        font-size: 15px;
+    }
+    .brand-name{
+        font-size: 13px;
+    }
+    .brand-sub{
+        display: none;
+    }
+    .nav-ekg{
+        display: none;
+    }
+    .status-pill span{
+        display: none;
+    }
+    .status-pill{
+        padding: 6px;
+    }
+    .checker-grid{
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    .col-selection{
+        height: auto;
+        max-height: 320px;
+    }
+    .cards-row{
+        grid-template-columns: 1fr;
+    }
+    .about-grid{
+        grid-template-columns: 1fr;
+    }
+    .banner-title{
+        font-size: 14px;
+    }
+    .banner-desc{
+        max-width: 100%;
+    }
+    .banner-stats{
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    .disease-name{
+        font-size: 18px;
+    }
+    .btn-analyze{
+        width: 100%;
+        justify-content: center;
+    }
+    .sidebar-hero-card{
+        display: none;
+    }
+    .disclaimer-footer{
+        font-size: 10px;
+        padding: 8px 12px;
+    }
+}
+
+/* SMALL MOBILE */
+@media (max-width: 400px) {
+    .topnav{
+        padding: 0 8px;
+    }
+    .theme-btn{
+        width: 30px;
+        height: 30px;
+    }
+    .nav-right{
+        gap: 8px;
+    }
+    .main-content{
+        padding: 8px 8px 0;
+    }
+    .grid-card{
+        padding: 12px;
+    }
+    .info-banner{
+        padding: 12px;
+    }
+    .bstat-divider{
+        display: none;
+    }
+}

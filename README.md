@@ -125,29 +125,31 @@ JSON response → Frontend renders result
 
 ## Project Structure
 
+```
 healthcheck-ai/
 ├── backend/
-│ ├── server.js # Express REST API
-│ ├── predict.py # ML inference script
-│ └── requirements.txt # Python dependencies
+│   ├── server.js
+│   ├── predict.py
+│   └── requirements.txt
 ├── frontend/
-│ ├── index.html # Dashboard UI
-│ ├── css/
-│ │ └── style.css # Medical green theme
-│ └── js/
-│ └── app.js # Frontend logic
+│   ├── index.html
+│   ├── css/
+│   │   └── style.css
+│   └── js/
+│       └── app.js
 ├── data/
-│ ├── disease_symptoms.csv
-│ ├── symptom_Description.csv
-│ ├── symptom_precaution.csv
-│ └── Symptom-severity.csv
+│   ├── disease_symptoms.csv
+│   ├── symptom_Description.csv
+│   ├── symptom_precaution.csv
+│   └── Symptom-severity.csv
 ├── model/
-│ ├── disease_model.pkl # Trained LR model
-│ ├── symptom_encoder.pkl # MultiLabelBinarizer
-│ ├── severity.csv # Cleaned severity weights
-│ └── symptoms_list.json # All 131 symptoms (for frontend)
+│   ├── disease_model.pkl
+│   ├── symptom_encoder.pkl
+│   ├── severity.csv
+│   └── symptoms_list.json
 └── notebooks/
-└── explore.ipynb # EDA + model training
+    └── explore.ipynb
+```
 
 
 ---

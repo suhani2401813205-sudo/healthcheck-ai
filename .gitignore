@@ -27,3 +27,12 @@ Thumbs.db
 # Logs
 *.log
 npm-debug.log*
+
+
+# Project root mein .gitignore banao
+echo "node_modules/
+__pycache__/
+*.pyc
+.env
+*.pkl
+*.json" > .gitignore

@@ -94,17 +94,26 @@ function renderCatSymptoms() {
         const valid = cat.symptoms.filter(s => allSymptoms.length === 0 || allSymptoms.includes(s));
         if (!valid.length) return '';
 
-        return `
-        <div class="cat-group open" id="cg-${i}">
-            <div class="cat-header" onclick="toggleCat('${i}')">
-                <i class="fa-solid ${cat.icon} cat-icon" style="color:${cat.color}"></i>
-                <span class="cat-label">${cat.name}</span>
-                <i class="fa-solid fa-chevron-down cat-arrow"></i>
-            </div>
-            <div class="cat-body">
-                ${valid.map(s => symItem(s)).join('')}
-            </div>
-        </div>`;
+      return `
+<div class="cat-group open" id="cg-${i}">
+    <div class="cat-header" onclick="toggleCat('${i}')">
+        <i class="fa-solid ${cat.icon} cat-icon" style="color:${cat.color}"></i>
+        <span class="cat-label">${cat.name}</span>
+        <span class="cat-count" style="color:${cat.color}">${valid.length}</span>
+        <i class="fa-solid fa-chevron-down cat-arrow"></i>
+    </div>
+    <div class="cat-body">
+        ${valid.map(s => `
+        <div class="sym-item ${selectedSymptoms.includes(s) ? 'active' : ''}"
+             data-sym="${s}" data-cat="${cat.id || i}"
+             onclick="toggleSymptom('${s}')"
+             style="${selectedSymptoms.includes(s) ? `border-left: 2px solid ${cat.color}` : ''}">
+            <i class="fa-solid ${selectedSymptoms.includes(s) ? 'fa-square-check' : 'fa-square'} sym-check"
+               style="color:${cat.color}"></i>
+            <span>${s.replace(/_/g, ' ')}</span>
+        </div>`).join('')}
+    </div>
+</div>`;
     }).join('');
 }
 
@@ -157,11 +166,14 @@ function updateUI() {
         if (selectedSymptoms.length === 0) {
             chipsContainer.innerHTML = `<div class="empty-chips"><i class="fa-solid fa-hand-pointer"></i><br>Select symptoms from the left panel</div>`;
         } else {
-            chipsContainer.innerHTML = selectedSymptoms.map(s => `
-                <div class="tag">
-                    <span>${s.replace(/_/g,' ')}</span>
-                    <button onclick="removeSymptom('${s}')">&times;</button>
-                </div>`).join('');
+           chipsContainer.innerHTML = selectedSymptoms.map(s => `
+    <div class="chip-item">
+        <i class="fa-solid fa-circle-check chip-icon"></i>
+        <span>${s.replace(/_/g,' ')}</span>
+        <button class="chip-remove" onclick="removeSymptom('${s}')">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </div>`).join('');
         }
     }
 
